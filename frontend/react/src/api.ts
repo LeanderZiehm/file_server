@@ -31,8 +31,10 @@ export const getFiles = async () => {
     throw new Error("Failed to fetch files");
   }
 
-  return response.json();
+  const data = await response.json();
+  return data ?? []; // fallback to [] if null
 };
+
 
 export const getFileUrl = (id: string) => {
   return `${API_BASE_URL}/files/${id}`;

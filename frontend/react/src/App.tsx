@@ -20,6 +20,7 @@ function App() {
   const fetchFiles = async () => {
     try {
       const files = await getFiles();
+      console.log(files);
       setFiles(files);
     } catch (error) {
       console.error(error);

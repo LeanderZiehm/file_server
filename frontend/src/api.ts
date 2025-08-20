@@ -54,3 +54,19 @@ export const deleteFile = async (id: string) => {
 
   return response.json();
 };
+
+export const updateFileName = async (id: string, newName: string) => {
+  const response = await fetch(`/update/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ name: newName }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to update file name');
+  }
+
+  return response.json();
+};

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { uploadFile, getFiles, getFileUrl, deleteFile } from './api';
+import { uploadFile, getFiles, getFileUrl, deleteFile,updateFileName } from './api';
 import './App.css';
 
 interface File {
@@ -39,6 +39,9 @@ function App() {
         await uploadFileDirectly(file);
       }
     };
+
+
+
 
     document.addEventListener('dragover', handlePageDragOver);
     document.addEventListener('dragleave', handlePageDragLeave);
@@ -92,6 +95,19 @@ function App() {
       }
     }
   };
+
+      const handleRename = async (id: string, currentName: string) => {
+  const newName = window.prompt('Enter new file name:', currentName);
+  if (!newName || newName === currentName) return;
+
+  try {
+    await updateFileName(id, newName);
+    await fetchFiles();
+  } catch (error) {
+    console.error(error);
+    alert('Failed to update file name.');
+  }
+};
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
@@ -213,24 +229,35 @@ function App() {
                     <p className="file-date">{formatDate(file.created_at)}</p>
                   </div>
 
+                  
                   <div className="file-actions">
-                    <a 
-                      href={getFileUrl(file.id)} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="action-btn download-btn"
-                      title="Download"
-                    >
-                      ⬇️
-                    </a>
-                    <button 
-                      onClick={() => handleDelete(file.id, file.name)}
-                      className="action-btn delete-btn"
-                      title="Delete"
-                    >
-                      🗑️
-                    </button>
-                  </div>
+  <a
+    href={getFileUrl(file.id)}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="action-btn download-btn"
+    title="Download"
+  >
+    ⬇️
+  </a>
+
+  <button
+    onClick={() => handleRename(file.id, file.name)}
+    className="action-btn rename-btn"
+    title="Rename"
+  >
+    ✏️
+  </button>
+
+  <button
+    onClick={() => handleDelete(file.id, file.name)}
+    className="action-btn delete-btn"
+    title="Delete"
+  >
+    🗑️
+  </button>
+</div>
+
                 </div>
               ))}
             </div>

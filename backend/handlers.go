@@ -148,3 +148,48 @@ func downloadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	http.ServeFile(w, r, meta.Path)
 }
+
+// Update a file's name
+func updateHandler(w http.ResponseWriter, r *http.Request) {
+	id := strings.TrimPrefix(r.URL.Path, "/update/")
+
+	var reqBody struct {
+		Name string `json:"name"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+	if reqBody.Name == "" {
+		http.Error(w, "name cannot be empty", http.StatusBadRequest)
+		return
+	}
+
+	store.Lock()
+	defer store.Unlock()
+
+	meta, ok := store.Files[id]
+	if !ok {
+		http.Error(w, "not found", http.StatusNotFound)
+		return
+	}
+
+	// Keep old path for renaming
+	oldPath := meta.Path
+	newPath := filepath.Join(dataDir, id+filepath.Ext(reqBody.Name))
+
+	// Rename file on disk
+	if err := os.Rename(oldPath, newPath); err != nil {
+		http.Error(w, "failed to rename file", http.StatusInternalServerError)
+		return
+	}
+
+	// Update metadata
+	meta.Name = reqBody.Name
+	meta.Path = newPath
+	store.Files[id] = meta
+	saveIndex()
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(meta)
+}

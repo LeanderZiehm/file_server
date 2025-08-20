@@ -57,6 +57,7 @@ func main() {
 	mux.HandleFunc("/upload", requireAPIKey(uploadHandler))
 	mux.HandleFunc("/files", requireAPIKey(listHandler))
 	mux.HandleFunc("/delete/", requireAPIKey(deleteHandler))
+	mux.HandleFunc("/update/", requireAPIKey(updateHandler))
 	mux.HandleFunc("/files/", downloadHandler) // public
 
 	log.Println("Server running on http://localhost:8080")
